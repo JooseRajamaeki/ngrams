@@ -14,8 +14,8 @@
 #include <map>
 #include <omp.h>
 
-std::pair<unsigned,unsigned> number_of_common_ngrams(const std::string& string1, const std::string& string2, unsigned n_max = 3);
-std::vector<int> find_closest(const std::vector<std::string>& words, const std::vector<std::string>& vocabulary);
+std::pair<unsigned,unsigned> number_of_common_ngrams(const std::string& string1, const std::string& string2, unsigned n_max, std::vector<std::string> ngrams = std::vector<std::string>());
+std::vector<int> find_closest(const std::vector<std::string>& words, const std::vector<std::string>& vocabulary, unsigned n_max = 3);
 
 std::vector<std::string> load_words(const std::string& filename);
 void write_closest_to_file(const std::string filename, const std::vector<std::string>& words, const std::vector<std::string>& vocabulary);

@@ -4,35 +4,52 @@
 
 #include "ngrams.hpp"
 
-std::pair<unsigned, unsigned> number_of_common_ngrams(const std::string& string1, const std::string& string2, unsigned n_max)
+void erase_duplicates(std::vector<std::string>& vec)
 {
+	for (unsigned i = 0; i < vec.size(); i++)
+	{
+		for (unsigned j = vec.size() - 1; j > i; j--)
+		{
+			if (vec[i] == vec[j])
+			{
+				vec.erase(vec.begin() + j);
+			}
+		}
+	}
+}
 
+std::vector<std::string> get_ngrams(const std::string& string, unsigned n_max)
+{
 	std::vector<std::string> ngrams;
 
 	for (unsigned n = 1; n <= n_max; n++)
 	{
-		for (unsigned i = 0; i + n <= string1.size(); i++)
+		for (unsigned i = 0; i + n <= string.size(); i++)
 		{
-			std::string substring = string1.substr(i, n);
-			ngrams.push_back(substring);
-		}
-		for (unsigned i = 0; i + n <= string2.size(); i++)
-		{
-			std::string substring = string2.substr(i, n);
+			std::string substring = string.substr(i, n);
 			ngrams.push_back(substring);
 		}
 	}
 
-	// Erase duplicates.
-	for (unsigned i = 0; i < ngrams.size(); i++)
+	erase_duplicates(ngrams);
+
+	return ngrams;
+}
+
+
+
+std::pair<unsigned, unsigned> number_of_common_ngrams(const std::string& string1, const std::string& string2, unsigned n_max, std::vector<std::string> ngrams)
+{
+
+	if (ngrams.size() == 0)
 	{
-		for (unsigned j = ngrams.size() - 1; j > i; j--)
-		{
-			if (ngrams[i] == ngrams[j])
-			{
-				ngrams.erase(ngrams.begin() + j);
-			}
-		}
+		ngrams = get_ngrams(string2, n_max);
+	}
+
+	{
+		std::vector<std::string> tmp = get_ngrams(string1,n_max);
+		ngrams.insert(ngrams.end(), tmp.begin(), tmp.end());
+		erase_duplicates(ngrams);
 	}
 
 	unsigned found = 0;
@@ -51,7 +68,7 @@ std::pair<unsigned, unsigned> number_of_common_ngrams(const std::string& string1
 
 }
 
-std::vector<int> find_closest(const std::vector<std::string>& words, const std::vector<std::string>& vocabulary)
+std::vector<int> find_closest(const std::vector<std::string>& words, const std::vector<std::string>& vocabulary, unsigned n_max)
 {
 	std::vector<int> idx_vocabulary(words.size(), -1);
 
@@ -77,7 +94,7 @@ std::vector<int> find_closest(const std::vector<std::string>& words, const std::
 		{
 			for (int j = 0; j < vocabulary_len; j++)
 			{
-				std::pair<unsigned,unsigned> ngrams = number_of_common_ngrams(words[i], vocabulary[j]);
+				std::pair<unsigned,unsigned> ngrams = number_of_common_ngrams(words[i], vocabulary[j], n_max);
 				float match = (float)ngrams.first / (float)ngrams.second;
 				if (match > best_match)
 				{
