@@ -73,9 +73,23 @@ std::vector<int> find_closest(const std::vector<std::string>& words, const std::
 	std::vector<int> idx_vocabulary(words.size(), -1);
 
 	std::map<std::string, int> already_processed;
+	
 
 	const int words_len = words.size();
 	const int vocabulary_len = vocabulary.size();
+
+
+	std::map<std::string, std::vector<std::string>> vocabulary_ngrams;
+#pragma omp parallel for
+	for (int i = 0; i < vocabulary_len; i++)
+	{
+		std::vector<std::string> ngrams = get_ngrams(vocabulary[i],n_max);
+#pragma omp critical
+		{
+			vocabulary_ngrams[vocabulary[i]] = ngrams;
+		}
+	}
+
 
 #pragma omp parallel for
 	for (int i = 0; i < words_len; i++)
@@ -94,7 +108,8 @@ std::vector<int> find_closest(const std::vector<std::string>& words, const std::
 		{
 			for (int j = 0; j < vocabulary_len; j++)
 			{
-				std::pair<unsigned,unsigned> ngrams = number_of_common_ngrams(words[i], vocabulary[j], n_max);
+				std::vector<std::string> ready_ngram = vocabulary_ngrams[vocabulary[j]];
+				std::pair<unsigned,unsigned> ngrams = number_of_common_ngrams(words[i], vocabulary[j], n_max, std::move(ready_ngram));
 				float match = (float)ngrams.first / (float)ngrams.second;
 				if (match > best_match)
 				{
