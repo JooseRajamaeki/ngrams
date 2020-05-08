@@ -1,0 +1,12 @@
+*.sln
+*.vcxproj*
+/src/.vs/
+*.pdb
+*.obj
+*.log
+*.tlog
+*.exe
+*.ilk
+*.idb
+*.ipdb
+*.iobj
